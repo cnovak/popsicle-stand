@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Popsicle Stand</title>
+  </head>
+  <body>
+    <audio id="background-music" src="audio/265549__vikuserro__cheap-flash-game-tune.mp3" type="audio/mpeg" loop></audio>
+    <header>
+      <h1 class="title">🍡 Popsicle Stand 🍡</h1>
+     
+      <div class="header-right">
+        <p class="align-text-left hidden">Day: <span class="day">0</span></p>
+        <p class="align-text-left">Money: <span class="money">0</span>¢</p>
+        
+      </div>
+        <button class="btn start rainbow-background">Start!</button>
+      <button class="btn sound">Sound Off</button>
+      
+      
+    </header>
+    <main>
+      <div class="message hidden rainbow-background"></div>
+      <div class="big-emoji stand">🚌</div>
+      <div class="big-emoji kid">🧍‍♀️</div>
+      
+    </main>
+    <div><button class="btn next-day rainbow-background hidden">Next Day</div>
+    <div class="modal hidden">
+      <h2 class="hidden">Day: <span class="day">0</span></h2>
+      <p>How much do you sell your popsicles for?</p>
+      <p>
+        <p>Price:<input type="number" class="price" />¢</p>
+        <!-- <p>Number:<input type="number" class="amount" /></p> -->
+        <button class="btn go">Go!</button>
+      </p>
+    </div>
+
+    <div class="overlay hidden"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
