@@ -9,6 +9,7 @@ let soundGameWin;
 let soundError;
 
 const modal = document.querySelector(".modal");
+const modalEnd = document.querySelector(".modal-end");
 const overlay = document.querySelector(".overlay");
 const nextDayBtn = document.querySelector(".next-day");
 
@@ -26,6 +27,7 @@ function sound(src) {
   this.sound.src = src;
   this.sound.setAttribute("preload", "auto");
   this.sound.setAttribute("controls", "none");
+  this.sound.classList.add("sound-point");
   this.sound.style.display = "none";
   document.body.appendChild(this.sound);
   this.play = function () {
@@ -45,24 +47,33 @@ function sound(src) {
 
 const Engine = {
   money: 0,
-  popcicles: [],
+  popcicles: 0,
   weather: 0,
-  day: 1,
+  day: 0,
   isGameRunning: false,
   popcicleCost: 50,
+  popsiclePrice: 0,
+  popciclesMade: 0,
+  popciclesSold: 0,
 
   startGame() {
-    this.money = 0;
     this.popcicles = 0;
+    this.popciclesMade = 0;
+    this.popciclesSold = 0;
     this.weather = [0, 1, 2];
-    this.day = 1;
+    this.day = 0;
+    this.money = 150;
+    Graphics.updateDayDisplay(this.day);
+    Graphics.updateMoneyDisplay(this.money, false);
+    Graphics.showMoneyDisplay();
+
+    this.popsiclePrice = 100;
     this.isGameRunning = true;
     if (isSoundOn) {
       document.getElementById("background-music").play();
     }
-    //Graphics.updateDayDisplay(this.day);
-    Graphics.updateMoneyDisplay(this.money, false);
-    Engine.nextDayDecisions();
+
+    Engine.nextDay();
   },
 
   endGame() {
@@ -71,11 +82,10 @@ const Engine = {
     startBtn.classList.remove("hidden");
   },
 
-  addMoney() {
-    let amount = 10;
-    // console.log(`addMoney: amount: ${amount}`);
-    // console.log(`addMoney: this.money1: ${this.money}`);
-    this.money = this.money + amount;
+  addMoney(cost) {
+    console.log(`addMoney: cost: ${cost}`);
+    console.log(`addMoney: this.money1: ${this.money}`);
+    this.money = this.money + cost;
     Graphics.updateMoneyDisplay(this.money);
   },
 
@@ -88,21 +98,35 @@ const Engine = {
     return demand < 0 ? 0 : demand;
   },
 
-  nextDayDecisions() {
-    priceCtl.value = 100;
+  nextDay() {
+    if (Engine.day === 7 || Engine.money <= 0) {
+      Graphics.openEndModal();
+      return;
+    }
+
+    priceEl.value = Engine.popsiclePrice;
+    Graphics.resetGraphics();
+
+    this.day++;
+    Graphics.updateDayDisplay(this.day);
+    Graphics.updatePopsicleCost(this.popcicleCost);
+    Graphics.updatePopsicleStats(this.popsiclesMade, this.popsiclesSold);
     Graphics.openModal();
   },
 
-  runDay(price) {
-    // Graphics.buyPopsicle();
+  runDay() {
     Graphics.closeModal();
 
     // Determine supply
-    let customers = Engine.calcDemand(0, price);
-    //Graphics.displayMessage(`Customers: ${customers}`);
+    let customers = Engine.calcDemand(0, this.popsiclePrice);
+    // Cannot have more customers than you have popsicles.
+    if (customers > this.popcicles) {
+      customers = this.popcicles;
+    }
     console.log(`customers: ${customers}`);
     Graphics.displayMessage(`Customers: 0`);
     for (let i = 0; i < customers; i++) {
+      Engine.popciclesSold++;
       Graphics.buyPopsicle(i);
       setTimeout(() => {
         Graphics.displayMessage(`Customers: ${i + 1}`);
@@ -115,6 +139,28 @@ const Engine = {
 };
 
 const Graphics = {
+  messageDisplayUntil: 0,
+  messageDisplayTime: 5000,
+  hideMessageTimer: null,
+
+  resetGraphics() {
+    // remove all popsicles and kids from last round
+    let kidEls = document.querySelectorAll(".kid");
+    for (let i = 0; i < kidEls.length; i++) {
+      kidEls[i].remove();
+    }
+
+    let popsicleEls = document.querySelectorAll(".popsicle");
+    for (let i = 0; i < popsicleEls.length; i++) {
+      popsicleEls[i].remove();
+    }
+
+    let soundPoint = document.querySelectorAll(".sound-point");
+    for (let i = 0; i < soundPoint.length; i++) {
+      soundPoint[i].remove();
+    }
+  },
+
   updateSoundDisplay() {
     console.log(soundCtrl.textContent);
     if (isSoundOn) {
@@ -131,6 +177,7 @@ const Graphics = {
   buyPopsicle(kidId) {
     //console.log("popscicle buy!");
     let kidEl = document.createElement("div");
+    let popsicleEl = document.createElement("div");
 
     // Randomize kid
     let kidIcons = ["🧍🏻‍♀️", "🧍🏼‍♀️", "🧍🏽‍♀️", "🧍🏾‍♀️", "🧍🏿‍♀️", "🧍🏻‍♂️", "🧍🏼‍♂️", "🧍🏽‍♂️", "🧍🏾‍♂️", "🧍🏿‍♂️"];
@@ -144,7 +191,10 @@ const Graphics = {
     let bodyEl = document.querySelector("body");
     bodyEl.appendChild(kidEl);
 
-    // kidEl.animate([{ opacity: [0, 1] }], { delay: kidId * 500, duration: 500 });
+    popsicleEl.textContent = "🍡";
+    popsicleEl.classList.add("popsicle");
+
+    let animationSpeed = 2000;
     kidEl.animate(
       [
         { transform: "translateX(0vw)" },
@@ -152,7 +202,7 @@ const Graphics = {
         { transform: "translateX(-86vw)" },
       ],
       {
-        duration: 1000,
+        duration: animationSpeed,
         iterations: 2,
         direction: "alternate",
         delay: kidId * 30,
@@ -163,14 +213,41 @@ const Graphics = {
 
     // update money
     setTimeout(() => {
-      Engine.addMoney();
-    }, 1000 + kidId * 30);
+      Engine.addMoney(Engine.popsiclePrice);
+      bodyEl.appendChild(popsicleEl);
+
+      popsicleEl.animate(
+        [
+          {
+            opacity: 1,
+            transform: "translate(0vw, 0vw)",
+          },
+          {
+            opacity: 0,
+            transform: "translate(35vw, -12vw)",
+          },
+        ],
+        {
+          duration: 500,
+          easing: "ease-in-out",
+          fill: "forwards",
+        }
+      );
+    }, animationSpeed + kidId * 30);
   },
 
-  displayMessage(message, flash = true) {
+  displayMessage(message) {
     let messageEl = document.querySelector(".message");
-    messageEl.classList.remove("hidden");
     messageEl.textContent = message;
+
+    const time = Date.now();
+    if (this.messageDisplayUntil < time) {
+      // Timer must have been done, show message
+      messageEl.classList.remove("hidden");
+    }
+    // update message to display for 5 seconds in the future
+    this.messageDisplayUntil = time + this.messageDisplayTime;
+
     messageEl.animate(
       [
         { backgroundColor: "rgba(0, 103, 238, 0.938)" },
@@ -181,7 +258,19 @@ const Graphics = {
         easing: "ease-in-out",
       }
     );
-    setTimeout(() => messageEl.classList.add("hidden"), 5000);
+
+    // Create time to hide message in the future.
+    if (!this.hideMessageTimer) {
+      this.hideMessageTimer = setInterval(() => {
+        const time = Date.now();
+        if (this.messageDisplayUntil < time) {
+          messageEl.classList.add("hidden");
+          clearInterval(this.hideMessageTimer);
+          this.hideMessageTimer = null;
+        }
+      }, 100);
+      console.log("created Timer " + this.hideMessageTimer);
+    }
   },
 
   openModal() {
@@ -194,34 +283,67 @@ const Graphics = {
     overlay.classList.add("hidden");
   },
 
-  updateMoneyDisplay(amount, playSound = true) {
-    let moneyEl = document.querySelector(".money");
-    moneyEl.textContent = amount;
+  openEndModal() {
+    modalEnd.classList.remove("hidden");
+    overlay.classList.remove("hidden");
+  },
 
-    if (playSound) {
+  closeEndModal() {
+    modalEnd.classList.add("hidden");
+    overlay.classList.add("hidden");
+  },
+
+  showMoneyDisplay() {
+    let moneyWrapperEls = document.querySelectorAll(".wrapper-money");
+    for (let i = 0; i < moneyWrapperEls.length; i++) {
+      moneyWrapperEls[i].classList.remove("hidden");
+    }
+  },
+
+  updateMoneyDisplay(amount, flash = true) {
+    let moneyEls = document.querySelectorAll(".money");
+    for (let i = 0; i < moneyEls.length; i++) {
+      moneyEls[i].textContent = amount;
+      if (flash) {
+        moneyEls[i].classList.add("rainbow-text");
+        setTimeout(() => {
+          moneyEls[i].classList.remove("rainbow-text");
+        }, 3000);
+      }
+    }
+
+    if (isSoundOn) {
       let soundAddPoint = new sound("audio/add-point.wav");
       soundAddPoint.play();
     }
+  },
 
-    moneyEl.classList.add("rainbow-text");
-    setTimeout(() => {
-      moneyEl.classList.remove("rainbow-text");
-    }, 3000);
+  updatePopsicleStats(popsciclesMade, popsciclesSold) {
+    console.log(popsciclesMade + " " + popsciclesSold);
+    popsiclesMadeEl.textContent = popsciclesMade;
+    popsiclesSoldEl.textContent = popsciclesSold;
   },
 
   updateDayDisplay(day) {
+    if (day === 1) {
+      let dayWrapperEls = document.querySelectorAll(".wrapper-day");
+      for (let i = 0; i < dayWrapperEls.length; i++) {
+        dayWrapperEls[i].classList.remove("hidden");
+      }
+    }
     let dayEls = document.querySelectorAll(".day");
     for (let i = 0; i < dayEls.length; i++) {
       dayEls[i].textContent = day;
     }
   },
+  updatePopsicleCost(cost) {
+    let popcicleCostEl = document.querySelector(".popsicle-cost");
+    popcicleCostEl.innerHTML = cost;
+  },
 };
 
 let soundCtrl = document.querySelector(".sound");
 let startBtn = document.querySelector(".start");
-let goBtn = document.querySelector(".go");
-let priceCtl = document.querySelector(".price");
-let amountCtl = document.querySelector(".amount");
 
 soundCtrl.addEventListener("click", (e) => {
   isSoundOn ? !isSoundOn : isSoundOn;
@@ -229,40 +351,85 @@ soundCtrl.addEventListener("click", (e) => {
 });
 
 startBtn.addEventListener("click", () => {
-  // Graphics.buyPopsicle();
-  console.log("isGameRunning:" + Engine.isGameRunning);
   if (!Engine.isGameRunning) {
     Engine.startGame();
   }
   startBtn.classList.add("hidden");
 });
 
-goBtn.addEventListener("click", () => {
-  let price = priceCtl.value;
-  //let amount = amountCtl.value;
-  console.log(`price: ${price}`);
-  // console.log(`amount: ${amount}`);
-
-  Engine.runDay(price);
-});
-
 nextDayBtn.addEventListener("click", () => {
-  Engine.endGame();
   nextDayBtn.classList.add("hidden");
+  Engine.nextDay();
 });
 
-// let kidEl = document
-//   .querySelector(".kid")
-//   .animate(
-//     [
-//       { transform: "translateX(0vw)" },
-//       { transform: "translateX(-25vw)" },
-//       { transform: "translateX(-25vw)" },
-//     ],
-//     {
-//       duration: 350,
-//       iterations: "100",
-//       direction: "alternate",
-//       delay: 0,
-//     }
-//   );
+// Modal
+let goBtn = document.querySelector(".go");
+let moneyEstimationEl = document.querySelector(".money-estimation");
+let priceEl = document.querySelector(".price");
+let amountEl = document.querySelector(".amount");
+let amountErrorEl = document.querySelector(".amount-error");
+let priceErrorEl = document.querySelector(".price-error");
+let popsiclesMadeEl = document.querySelector(".popsicles-made");
+console.log(popsiclesMadeEl);
+let popsiclesSoldEl = document.querySelector(".popsicles-sold");
+
+goBtn.addEventListener("click", () => {
+  let isError = false;
+  if (!amountEl.checkValidity()) {
+    amountErrorEl.innerHTML = amountEl.validationMessage;
+    isError = true;
+  }
+
+  if (!priceEl.checkValidity()) {
+    priceErrorEl = priceEl.validationMessage;
+    isError = true;
+  }
+
+  if (isError) {
+    return;
+  } else {
+    let errorEls = document.querySelectorAll(".error");
+    for (let i = 0; i < errorEls.length; i++) {
+      errorEls[i].innerHTML = "";
+    }
+  }
+
+  // Valid
+  Engine.popsiclePrice = Number(priceEl.value);
+  Engine.popcicles = Number(amountEl.value);
+  Engine.popciclesMade += Engine.popsicles;
+
+  Engine.money = Engine.money - Engine.popcicles * Engine.popcicleCost;
+
+  Graphics.updateMoneyDisplay(Engine.money);
+
+  // Reset amount
+  amountEl.value = "";
+  Engine.runDay();
+});
+
+amountEl.addEventListener("input", (e) => {
+  let amount = Number(amountEl.value);
+  if (amount < 0) {
+    amountErrorEl.innerHTML = "Amount must be larger than 0.";
+  } else {
+    amountErrorEl.innerHTML = "";
+  }
+  let estimatedMoney = Engine.money - amount * Engine.popcicleCost;
+  if (estimatedMoney >= 0) {
+    amountErrorEl.innerHTML = "";
+    moneyEstimationEl.textContent = estimatedMoney;
+    goBtn.classList.remove("hidden");
+  } else {
+    amountErrorEl.innerHTML = "You do not have enough money.";
+    goBtn.classList.add("hidden");
+  }
+});
+
+// End Modal
+let okBtn = document.querySelector(".ok");
+
+okBtn.addEventListener("click", () => {
+  Graphics.closeEndModal();
+  Engine.endGame();
+});

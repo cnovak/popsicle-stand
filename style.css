@@ -214,11 +214,22 @@ input {
   }
 } */
 
+.error {
+  color: red;
+}
+
 .stand {
   font-size: 10rem;
   position: absolute;
   bottom: 25vh;
   right: 80vw;
+}
+
+.popsicle {
+  font-size: 3rem;
+  position: absolute;
+  bottom: 37vh;
+  right: 77vw;
 }
 
 /* -------------------------- */

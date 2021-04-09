@@ -13,8 +13,8 @@
       <h1 class="title">🍡 Popsicle Stand 🍡</h1>
      
       <div class="header-right">
-        <p class="align-text-left hidden">Day: <span class="day">0</span></p>
-        <p class="align-text-left">Money: <span class="money">0</span>¢</p>
+        <p class="align-text-left wrapper-day hidden">Day: <span class="day">0</span></p>
+        <p class="align-text-left wrapper-money hidden">Money: <span class="money">0</span>¢</p>
         
       </div>
         <button class="btn start rainbow-background">Start!</button>
@@ -23,20 +23,39 @@
       
     </header>
     <main>
+      <div class=" ">
+        <h2 class="wrapper-day">Day: <span class="day">0</span></h2>
+        <h2 class="wrapper-day">Popsicles Made: <span class="popsicles-made">0</span></h2>
+        <h2 class="wrapper-day">Popsicles Sold: <span class="popsicles-sold">0</span></h2>
+        <h2 class="wrapper-money">Money: <span class="money money-estimation">0</span>¢</h2>
+        <p>How much do you sell your popsicles for?</p>
+        <p>
+          <p class="price-error error"> </p>
+          <p>Price:<input type="number" min="0" required class="price" />¢</p>        
+        </p>
+        <p>Popsicles cost <span class="popsicle-cost">50</span>¢ to make, how many popsicles do you make?</p>
+        <p>
+          <p class="amount-error error"> </p>
+          <p>Popsicles:<input type="number" min="0" required class="amount" /> 🍡</p>
+        </p>
+        <button class="btn go rainbow-background">Go!</button>
+      </div>
       <div class="message hidden rainbow-background"></div>
+      <div class="header-right">
       <div class="big-emoji stand">🚌</div>
       <div class="big-emoji kid">🧍‍♀️</div>
+      </div>
       
     </main>
     <div><button class="btn next-day rainbow-background hidden">Next Day</div>
-    <div class="modal hidden">
-      <h2 class="hidden">Day: <span class="day">0</span></h2>
-      <p>How much do you sell your popsicles for?</p>
-      <p>
-        <p>Price:<input type="number" class="price" />¢</p>
-        <!-- <p>Number:<input type="number" class="amount" /></p> -->
-        <button class="btn go">Go!</button>
-      </p>
+    
+
+    <div class="modal modal-end hidden">
+      <h2> Game Over </h2>
+      <h2 class="wrapper-day">Days: <span class="day">0</span></h2>
+      <h2 class="wrapper-money">Money: <span class="money money-estimation">0</span>¢</h2>
+      
+      <button class="btn ok rainbow-background">OK</button>
     </div>
 
     <div class="overlay hidden"></div>
