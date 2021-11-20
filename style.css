@@ -34,7 +34,7 @@ body {
   flex-wrap: wrap;
 }
 body > * {
-  background: rgba(18, 165, 233, 0.048);
+  background: #f4fafd;
   text-align: center;
   border: 5px solid white;
 }
@@ -46,11 +46,15 @@ body > * {
 }
 
 .title {
-  background-color: bisque;
+  /* background-color: bisque; */
 }
 
 .message {
   background-color: rgb(2, 146, 230);
+}
+
+.error {
+  color: red;
 }
 
 .sidebar {
@@ -60,6 +64,8 @@ body > * {
   flex-direction: column;
   align-items: center;
   justify-content: normal;
+  padding: 1rem;
+  z-index: 2;
 }
 
 .sidebar > div {
@@ -67,6 +73,10 @@ body > * {
   border: 5px solid rgba(201, 199, 199, 0.473); */
   padding: 1rem;
   padding-bottom: 2rem;
+}
+
+.flex-bottom {
+  margin-top: auto;
 }
 
 .info {
@@ -106,11 +116,12 @@ body > * {
   border: 5px solid rgb(2, 146, 230); */
 }
 
-.main {
+.board {
   flex: 2;
   position: relative;
   padding: 1em;
   height: 80vh;
+  overflow: hidden;
 }
 
 .box {
@@ -131,14 +142,17 @@ body > * {
 .kid {
   font-size: 8rem;
   position: absolute;
-  left: 15%;
+  left: 100%;
   bottom: 30%;
+  z-index: 3;
 }
 
-.store-wrapper {
+.stand {
   position: absolute;
-  left: 15%;
+  left: 100%;
   bottom: 30%;
+  z-index: 0;
+  /* overflow: hidden; */
 }
 
 .sign {
@@ -146,9 +160,10 @@ body > * {
   color: white;
   position: absolute;
   top: 0%;
+  left: 22%;
 }
 
-.store {
+.stand .icon {
   font-size: 10rem;
 }
 
@@ -222,6 +237,20 @@ input {
 }
 
 .day-meter {
+  width: 100%;
+  /* background-color: white; */
+}
+
+.ice-cream {
+  width: 15rem;
+}
+
+.bar {
+  width: 100%;
+  height: 30px;
+}
+
+/* .day-meter {
   width: 10rem;
 }
 
@@ -229,7 +258,6 @@ input {
   height: 1rem;
 
   position: relative;
-  /* background: #2225; */
   border-radius: 1px;
   padding: 0;
   box-shadow: inset 0 -1px 1px rgba(255, 255, 255, 0.3);
@@ -246,8 +274,6 @@ input {
   background-image: rgb(2, 146, 230);
   animation: progressBar 10s linear 2s infinite;
 
-  /* box-shadow: inset 0 2px 9px rgba(255, 255, 255, 0.3),
-    inset 0 -2px 6px #222; */
   position: relative;
   overflow: hidden;
 }
@@ -259,4 +285,69 @@ input {
   100% {
     width: 0%;
   }
+} */
+
+/* -------------------------- */
+/* MODAL  */
+.hidden {
+  display: none;
 }
+
+.modal {
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw;
+  /* height: 80vh; */
+
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.modal div {
+  margin-bottom: 2rem;
+}
+
+.modal-wrapper {
+  margin: 0 auto;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.day-start-modal .sound-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 5px;
+}
+
+.day-result-modal {
+  height: 40vh;
+}
+
+.price-center {
+  margin: 0 auto;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 5;
+}
+
+.high-scores-list {
+  padding: 2%;
+  list-style-type: none;
+}
+/* -------------------------- */

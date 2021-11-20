@@ -1,60 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Popsicle Stand</title>
-  </head>
-  <body>
-    <header class="header"><h1>🍦 Ice Cream Stand 🍦</h1></header>
-    <div class="message">Message</div>
-    <aside class="sidebar">
-      <div class="info">
-        <div>Day:1</div>
-        <div>$12.00</div>
-      </div>
-      <div class="info2">
-        <div class="day-meter meter">
-          <span></span>
-        </div>
-        <div><span class="small-emoji">🍦</span> x 7</div>
-      </div>
 
-      <div class="make-wrapper">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="style.css" />
+  <title>icecream Stand</title>
+</head>
+
+<body>
+  <audio id="background-music" src="audio/265549__vikuserro__cheap-flash-game-tune.mp3" type="audio/mpeg" loop></audio>
+  <header class="header">
+    <h1>🍦 Ice Cream Stand 🍦</h1>
+  </header>
+  <div class="message"></div>
+  <aside class="sidebar">
+    <div class="info">
+      <div>Day:<span class="sidebar-day">0</span></div>
+      <div>$<span class="sidebar-money">0</span></div>
+    </div>
+    <div class="info">
+      <div class="day-meter meter">
+        <div class="bar"></div>
+      </div>
+      <div class="ice-cream">
+        <span class="small-emoji">🍦</span>x<span class="ice-cream-count">0</span>
+      </div>
+    </div>
+
+    <!-- <div class="make-wrapper">
         <div>
           <button class="button make">
             Make 10 <span class="small-emoji">🍦</span>
-            <div class="text-small">$.50 each</div>
+            <div class="text-small">$<span class="icecream-cost">0</span> each</div>
           </button>
-        </div>
-        <div class="make-meter meter">
-          <span></span>
-        </div>
-      </div>
-      <div class="price">
-        Price: $1.00
-        <input
+        </div> -->
+    <!-- <div class="make-meter meter"> -->
+    <span></span>
+    </div>
+    </div>
+    <div class="price">
+      Price: $<span class="sidebar-icecream-price">0.00</span>
+      <!-- <input
           type="range"
           min="1"
           max="100"
           value="50"
           class="slider"
           id="myRange"
-        />
+        /> -->
+    </div>
+    
+  </aside>
+  <main class="board">
+    <div class="weather hidden">🌧</div>
+    <div class="weather hidden">🌪</div>
+    <div class="weather">☀️</div>
+    <div class="stand">
+      <div class="sign">🍦 $<span class="price">1.00</span> 🍦</div>
+      <div class="icon">🚌</div>
+    </div>
+    <div class="kid">🧍🏼‍♀️</div>
+  </main>
+
+  <footer class="footer">Hi Kaitlyn, Anna, and Jack! 👋🏻</footer>
+
+  <div class="day-start-modal modal hidden">
+    <div class="modal-wrapper">
+      <div class="sound-button">
+        <button class="button sound">Sound On</button>
       </div>
-    </aside>
-    <main class="main">
-      <div class="weather">🌧</div>
-      <div class="weather hidden">☀️</div>
-      <div class="store-wrapper">
-        <div class="sign">🍦 $1.00 🍦</div>
-        <div class="store">🚌</div>
+
+      <h2 class="wrapper-day">Day: <span class="day">0</span></h2>
+      <div>
+        <div class="cash-error error"></div>
+        <div>Cash: $<span class="cash" /> </div>
       </div>
-      <div class="kid hidden">🧍🏼‍♀️</div>
-    </main>
-    <footer class="footer">Footer</footer>
-    <script src="script.js"></script>
-  </body>
+
+      <div>
+        <span class="price-wrapper"></span> Berries per ice cream:
+
+        <span class="berries berries-center">
+          <input type="range" min="1" max="20" value="5" class="slider berry-slider" id="myRange" />
+          <span class="berry-count">5</span>🍓 $<span class="berry-cost">0.25</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="sticks">How much ice cream do you want to make?</div>
+      <div class="icecream-count-error error"> </div>
+      <div>Ice Cream:<input type="number" min="0" value="1" required class="icecream-count" /> 🍦</div>
+    </div>
+
+    <div>How much do you sell your ice creams for?</div>
+    <div>
+      <div class="icecream-price-error error"> </div>
+      <div>Price: <input value=".50" min="0.01" step="0.01" type="number" min="0" required class="icecream-price" />
+      </div>
+    </div>
+
+    <button class="button go rainbow-background">Go!</button>
+  </div>
+  </div>
+
+  <div class="day-result-modal modal hidden">
+    <div class="modal-wrapper">
+      <h2 class="wrapper-day">Day: <span class="day">0</span></h2>
+
+      <h2>Sales: <span class="icecream-sold"></span>🍦 x
+        <span class="icecream-sale-price"></span> =
+        <span class="revenue"></span>
+      </h2>
+      <h2>Cash: $<span class="cash"></span></h2>
+
+      <button class="button ok rainbow-background">OK</button>
+    </div>
+  </div>
+
+
+  <div class="end-game-modal modal hidden">
+    <div class="modal-wrapper">
+      <h1> 🥳 Game over 🥳</h1>
+
+      <h2 class="wrapper-day">Day: <span class="day">0</span></h2>
+
+      <h2>You made: $<span class="cash">4.00 Hi Jack</span></h2>
+
+      <button class="button ok rainbow-background">OK</button>
+    </div>
+  </div>
+
+  <div class="game-over-modal modal hidden">
+    <div class="modal-wrapper">
+      <h1> 🥳 Game over 🥳</h1>
+
+      <div class="high-scores">
+
+        <h2>High Scores</h2>
+        <ul class="high-scores-list">
+          <li><span class="name">Kailtyn</span> <span class="">100</span></li>
+          <li><span class="name">Jack</span> <span class="">99</span></li>
+          <li><span class="name">Anna</span> <span class="">98</span></li>
+        </ul>
+
+          <button class="button new-game rainbow-background">New Game</button>
+          <div class="name-wrapper hidden">Name:
+            <input type="text" class="name" id="name" required minlength="1" maxlength="10" size="10">
+            <button class="button go rainbow-background">Go</button>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay hidden"></div>
+
+  <div class="flex-bottom">
+    <button class="button sound">Sound on</button>
+  </div>
+  <!-- <script src="script.js"></script> -->
+  <script type="module" src="main.js"></script>
+
+</body>
+
 </html>

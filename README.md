@@ -1,2 +1,3 @@
-# popsicle-stand
-Popsicle Game
+# icecream-stand
+
+Ice Cream Game
