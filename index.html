@@ -1,64 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Popsicle Stand</title>
-  </head>
-  <body>
-    <audio id="background-music" src="audio/265549__vikuserro__cheap-flash-game-tune.mp3" type="audio/mpeg" loop></audio>
-    <header>
-      <h1 class="title">🍡 Popsicle Stand 🍡</h1>
-     
-      <div class="header-right">
-        <p class="align-text-left wrapper-day hidden">Day: <span class="day">0</span></p>
-        <p class="align-text-left wrapper-money hidden">Money: <span class="money">0</span>¢</p>
-        
-      </div>
-        <button class="btn start rainbow-background">Start!</button>
-      <button class="btn sound">Sound Off</button>
-      
-      
-    </header>
-    <main>
-      <div class=" ">
-        <h2 class="wrapper-day">Day: <span class="day">0</span></h2>
-        <h2 class="wrapper-day">Popsicles Made: <span class="popsicles-made">0</span></h2>
-        <h2 class="wrapper-day">Popsicles Sold: <span class="popsicles-sold">0</span></h2>
-        <h2 class="wrapper-money">Money: <span class="money money-estimation">0</span>¢</h2>
-        <p>How much do you sell your popsicles for?</p>
-        <p>
-          <p class="price-error error"> </p>
-          <p>Price:<input type="number" min="0" required class="price" />¢</p>        
-        </p>
-        <p>Popsicles cost <span class="popsicle-cost">50</span>¢ to make, how many popsicles do you make?</p>
-        <p>
-          <p class="amount-error error"> </p>
-          <p>Popsicles:<input type="number" min="0" required class="amount" /> 🍡</p>
-        </p>
-        <button class="btn go rainbow-background">Go!</button>
-      </div>
-      <div class="message hidden rainbow-background"></div>
-      <div class="header-right">
-      <div class="big-emoji stand">🚌</div>
-      <div class="big-emoji kid">🧍‍♀️</div>
-      </div>
-      
-    </main>
-    <div><button class="btn next-day rainbow-background hidden">Next Day</div>
-    
 
-    <div class="modal modal-end hidden">
-      <h2> Game Over </h2>
-      <h2 class="wrapper-day">Days: <span class="day">0</span></h2>
-      <h2 class="wrapper-money">Money: <span class="money money-estimation">0</span>¢</h2>
-      
-      <button class="btn ok rainbow-background">OK</button>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="style.css" />
+  <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+
+<body>
+  <div>
+    <button class="sound global-sound button"></button>
+  </div>
+  <audio id="background-music" src="audio/265549__vikuserro__cheap-flash-game-tune.mp3" type="audio/mpeg" loop></audio>
+  <header class="header">
+    <h1>🍦 Ice Cream Stand 🍦</h1>
+  </header>
+  <div class="message"></div>
+  <aside class="sidebar">
+    <div class="info">
+      <div>Day:<span class="day">0</span></div>
+      <div>$<span class="money">0</span></div>
+    </div>
+    <div class="info">
+      <div class="day-meter meter">
+        <div class="bar"></div>
+      </div>
+      <div class="ice-cream">
+        <span class="small-emoji">🍦</span>x<span class="ice-cream-count">0</span>
+      </div>
     </div>
 
-    <div class="overlay hidden"></div>
-    <script src="script.js"></script>
-  </body>
+    <!-- <div class="make-wrapper">
+        <div>
+          <button class="button make">
+            Make 10 <span class="small-emoji">🍦</span>
+            <div class="text-small">$<span class="icecream-cost">0</span> each</div>
+          </button>
+        </div> -->
+    <!-- <div class="make-meter meter"> -->
+    <span></span>
+    </div>
+    </div>
+    <div class="price">
+      Price: $<span class="icecream-sale-price">0.00</span>
+      <!-- <input
+          type="range"
+          min="1"
+          max="100"
+          value="50"
+          class="slider"
+          id="myRange"
+        /> -->
+    </div>
+    
+  </aside>
+  <main class="board">
+    <div class="weather hidden">🌧</div>
+    <div class="weather hidden">🌪</div>
+    <div class="weather sun">☀️</div>
+    <div class="stand">
+      <div class="sign">🍦 $<span class="price"></span> 🍦</div>
+      <div class="icon">🚌</div>
+    </div>
+  </main>
+
+  <footer class="footer">Hi Kaitlyn, Anna, and Jack! 👋🏻</footer>
+
+  <div class="day-start-modal modal hidden">
+    <div class="modal-wrapper">
+      <h2 class="wrapper-day"><span class="player-name"></span> Day: <span class="day">0</span></h2>
+      <div>
+        <div><span class="medium-emoji">🍦</span><span class="current-ice-cream-count" ></span> + <span class="medium-emoji">🍦</span><span class="create-ice-cream-count" ></span> new </div>
+        <div class="cash-error error"></div>
+        <div>Cash: $<span class="cash" /> </div>
+      </div>
+
+      <div>
+        <span class="price-wrapper"></span> Berries per ice cream:
+
+        <span class="berries berries-center">
+          <input type="range" min="1" max="20" value="0" class="slider berry-slider" id="myRange" />
+          <span class="berry-count">0</span>🍓 x $<span class="berry-cost">0.00</span> = $<span class="berries-per-item-cost">0.00</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="sticks">How much ice cream do you want to make?</div>
+      <div class="icecream-count-error error"> </div>
+      <div>Ice Cream:<input type="number" min="0" value="0" required class="icecream-count" /> 🍦</div>
+    </div>
+
+    <div>How much do you sell your ice cream for?</div>
+    <div>
+      <div class="icecream-price-error error"> </div>
+      <div>Price: $<input value="0.00" min="0.01" step="0.01" type="number" min="0" required class="icecream-price" />
+      </div>
+    </div>
+
+    <button class="button go rainbow-background">Go!</button>
+  </div>
+  </div>
+
+  <div class="day-result-modal modal hidden">
+    <div class="modal-wrapper">
+      <h2 class="wrapper-day">Day: <span class="day">0</span></h2>
+
+      <h2>Sales: <span class="icecream-sold"></span>🍦 x
+        <span class="icecream-sale-price"></span> =
+        <span class="revenue"></span>
+      </h2>
+      <h2>Profit: <span class="icecream-sold2"></span>🍦 x
+        <span class="icecream-profit-per-item"></span> =
+        <span class="total-profit"></span>
+      </h2>
+      <h2>Starting Cash: $<span class="starting-cash"></span> -> Ending Cash: $<span class="cash"></span></h2>
+      <h2>Inventory: <span class="inventory"></span>🍦</h2>
+
+      <button class="button ok rainbow-background">OK</button>
+    </div>
+  </div>
+
+  <div class="end-game-modal modal hidden">
+    <div class="modal-wrapper">
+      <h1> 🥳 Game over 🥳</h1>
+
+      <h2 class="wrapper-day">Days: <span class="days"></span></h2>
+
+      <h2>You made: $<span class="cash"></span></h2>
+
+      <button class="button ok rainbow-background">OK</button>
+    </div>
+  </div>
+
+  <div class="game-over-modal modal hidden">
+    <div class="modal-wrapper">
+      <h1> 🥳 Game over 🥳</h1>
+
+      <div class="high-scores">
+
+        <h2>High Scores</h2>
+        <ul class="high-scores-list"></ul>
+
+          <button class="button new-game rainbow-background">New Game</button>
+          <div class="name-wrapper hidden">Name:
+            <input type="text" class="name" id="name" required minlength="1" maxlength="10" size="10">
+            <button class="button go rainbow-background">Go</button>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay hidden"></div>
+
+
+</body>
+
 </html>

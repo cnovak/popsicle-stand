@@ -1,435 +1,586 @@
 "use strict";
 
-let isSoundOn = false;
+const BERRY_COST = 0.05;
 
-let soundGameStart;
-let soundLoosePoint;
-let soundGameOver;
-let soundGameWin;
-let soundError;
+const Sound = {
+  isSoundOn: false,
+  soundList: [],
+  backgroundMusicEl: document.querySelector("#background-music"),
 
-const modal = document.querySelector(".modal");
-const modalEnd = document.querySelector(".modal-end");
-const overlay = document.querySelector(".overlay");
-const nextDayBtn = document.querySelector(".next-day");
-
-// From: https://www.sitepoint.com/delay-sleep-pause-wait/
-function sleep(milliseconds) {
-  const date = Date.now();
-  let currentDate = null;
-  do {
-    currentDate = Date.now();
-  } while (currentDate - date < milliseconds);
-}
-
-function sound(src) {
-  this.sound = document.createElement("audio");
-  this.sound.src = src;
-  this.sound.setAttribute("preload", "auto");
-  this.sound.setAttribute("controls", "none");
-  this.sound.classList.add("sound-point");
-  this.sound.style.display = "none";
-  document.body.appendChild(this.sound);
-  this.play = function () {
-    if (isSoundOn) {
-      this.sound.play();
+  init() {
+    Sound.playAddPoint();
+    if (Sound.isSoundOn) {
+      Sound.playBackgroundMusic();
     }
-  };
-  this.stop = function () {
-    this.sound.pause();
-  };
-}
-
-// https://freesound.org/people/vikuserro/sounds/265549/
-// let backgroundMusic = new sound(
-//   "audio/265549__vikuserro__cheap-flash-game-tune.mp3"
-// );
-
-const Engine = {
-  money: 0,
-  popcicles: 0,
-  weather: 0,
-  day: 0,
-  isGameRunning: false,
-  popcicleCost: 50,
-  popsiclePrice: 0,
-  popciclesMade: 0,
-  popciclesSold: 0,
-
-  startGame() {
-    this.popcicles = 0;
-    this.popciclesMade = 0;
-    this.popciclesSold = 0;
-    this.weather = [0, 1, 2];
-    this.day = 0;
-    this.money = 150;
-    Graphics.updateDayDisplay(this.day);
-    Graphics.updateMoneyDisplay(this.money, false);
-    Graphics.showMoneyDisplay();
-
-    this.popsiclePrice = 100;
-    this.isGameRunning = true;
-    if (isSoundOn) {
-      document.getElementById("background-music").play();
-    }
-
-    Engine.nextDay();
   },
 
-  endGame() {
-    this.isGameRunning = false;
-    document.getElementById("background-music").pause();
-    startBtn.classList.remove("hidden");
+  playAddPoint: function () {
+    this.play("audio/add-point.wav");
   },
 
-  addMoney(cost) {
-    console.log(`addMoney: cost: ${cost}`);
-    console.log(`addMoney: this.money1: ${this.money}`);
-    this.money = this.money + cost;
-    Graphics.updateMoneyDisplay(this.money);
-  },
-
-  calcDemand(weather, price) {
-    let multiplier = weather * 0.1;
-    let demand = (-0.6 + multiplier) * price + 100;
-    console.log(
-      `calcDemand: weather:${weather}, multiplier:${multiplier}, price:${price} = ${demand}`
-    );
-    return demand < 0 ? 0 : demand;
-  },
-
-  nextDay() {
-    if (Engine.day === 7 || Engine.money <= 0) {
-      Graphics.openEndModal();
-      return;
+  toggleSound: function () {
+    if (this.isSoundOn) {
+      this.isSoundOn = false;
+      this.stopBackgroundMusic();
+      Graphics.updateSoundBtnText("Sound On");
+      engine.dayModal.updateSoundBtnText("Sound On");
+    } else {
+      this.isSoundOn = true;
+      this.playBackgroundMusic();
+      Graphics.updateSoundBtnText("Sound Off");
+      engine.dayModal.updateSoundBtnText("Sound Off");
     }
-
-    priceEl.value = Engine.popsiclePrice;
-    Graphics.resetGraphics();
-
-    this.day++;
-    Graphics.updateDayDisplay(this.day);
-    Graphics.updatePopsicleCost(this.popcicleCost);
-    Graphics.updatePopsicleStats(this.popsiclesMade, this.popsiclesSold);
-    Graphics.openModal();
   },
 
-  runDay() {
-    Graphics.closeModal();
+  playBackgroundMusic: function () {
+    this.backgroundMusicEl.play();
+  },
 
-    // Determine supply
-    let customers = Engine.calcDemand(0, this.popsiclePrice);
-    // Cannot have more customers than you have popsicles.
-    if (customers > this.popcicles) {
-      customers = this.popcicles;
+  stopBackgroundMusic: function () {
+    this.backgroundMusicEl.pause();
+  },
+
+  play: function (sound) {
+    if (!this.soundList[sound]) {
+      this.soundList[sound] = new Audio(sound);
+      this.soundList[sound].load();
     }
-    console.log(`customers: ${customers}`);
-    Graphics.displayMessage(`Customers: 0`);
-    for (let i = 0; i < customers; i++) {
-      Engine.popciclesSold++;
-      Graphics.buyPopsicle(i);
-      setTimeout(() => {
-        Graphics.displayMessage(`Customers: ${i + 1}`);
-      }, 50 * i);
-    }
-    setTimeout(() => {
-      nextDayBtn.classList.remove("hidden");
-    }, 1000);
+    this.soundList[sound].cloneNode(true).play();
   },
 };
 
-const Graphics = {
-  messageDisplayUntil: 0,
-  messageDisplayTime: 5000,
-  hideMessageTimer: null,
+class Engine {
+  constructor() {
+    this.iceCreamCount = 0;
+    this.startIcecreamCount = 0;
+    this.icecreamSalePrice = 0;
+    this.icecreamCost = 0;
+    this.kidQueue = [];
+    this.daylength = 5000;
+    this.day = 1;
+    this.cash = 3.0;
+    this.startCash = 0;
+    this.dayModal = new DayModal();
+    this.dayResultModal = new DayResultModal();
+    this.endGameModal = new EndGameModal();
+  }
 
-  resetGraphics() {
-    // remove all popsicles and kids from last round
-    let kidEls = document.querySelectorAll(".kid");
-    for (let i = 0; i < kidEls.length; i++) {
-      kidEls[i].remove();
-    }
+  startGame() {
+    Graphics.init();
+    Events.init();
+    this.isGameRunning = true;
+    Sound.init();
 
-    let popsicleEls = document.querySelectorAll(".popsicle");
-    for (let i = 0; i < popsicleEls.length; i++) {
-      popsicleEls[i].remove();
-    }
+   
+    this.showDayModal();
+  }
 
-    let soundPoint = document.querySelectorAll(".sound-point");
-    for (let i = 0; i < soundPoint.length; i++) {
-      soundPoint[i].remove();
-    }
-  },
+  nextDay() {
+    if ((this.day <= 1)) {
+      this.day++;
+      this.showDayModal();
 
-  updateSoundDisplay() {
-    console.log(soundCtrl.textContent);
-    if (isSoundOn) {
-      soundCtrl.textContent = "Sound Off";
-      document.getElementById("background-music").pause();
-      isSoundOn = false;
     } else {
-      document.getElementById("background-music").play();
-      soundCtrl.textContent = "Sound On";
-      isSoundOn = true;
+      // do something
+      // console.log('here');
+      this.endGameModal.setStats(this.cash, this.day);
+      this.endGameModal.open();
     }
-  },
+  }
 
-  buyPopsicle(kidId) {
-    //console.log("popscicle buy!");
-    let kidEl = document.createElement("div");
-    let popsicleEl = document.createElement("div");
+  showDayModal() {
+    console.log('------- show day modal -------');
+    this.dayModal.setDay(this.day);
+    this.dayModal.setCash(this.cash);
 
-    // Randomize kid
-    let kidIcons = ["🧍🏻‍♀️", "🧍🏼‍♀️", "🧍🏽‍♀️", "🧍🏾‍♀️", "🧍🏿‍♀️", "🧍🏻‍♂️", "🧍🏼‍♂️", "🧍🏽‍♂️", "🧍🏾‍♂️", "🧍🏿‍♂️"];
-    let kidIndex = Math.floor(Math.random() * 10);
-    //console.log(`kidIndex: ${kidIndex}`);
+    this.dayModal.openModal();
+  }
 
-    kidEl.textContent = kidIcons[kidIndex];
-    kidIcons[kidIndex];
-    kidEl.classList.add("big-emoji");
-    kidEl.classList.add("kid");
-    let bodyEl = document.querySelector("body");
-    bodyEl.appendChild(kidEl);
-
-    popsicleEl.textContent = "🍡";
-    popsicleEl.classList.add("popsicle");
-
-    let animationSpeed = 2000;
-    kidEl.animate(
-      [
-        { transform: "translateX(0vw)" },
-        { transform: "translateX(-80vw)" },
-        { transform: "translateX(-86vw)" },
-      ],
-      {
-        duration: animationSpeed,
-        iterations: 2,
-        direction: "alternate",
-        delay: kidId * 30,
-        easing: "ease-in-out",
-        composite: "add",
+  runDay() {
+    //animation: progressBar 10s linear 2s infinite;
+    console.log('------- run day -------');
+    Graphics.openStand().finished.then(function () {
+      console.log('------- generate -------');
+      // Determine supply
+      let customers = 0;
+      let totalDemand = engine.calcDemand(engine.icecreamSalePrice);
+      
+      // Cannot have more customers than you have popsicles.
+      if (totalDemand > engine.iceCreamCount) {
+        customers = engine.iceCreamCount;
+      } else {
+        customers = totalDemand;
       }
-    );
-
-    // update money
-    setTimeout(() => {
-      Engine.addMoney(Engine.popsiclePrice);
-      bodyEl.appendChild(popsicleEl);
-
-      popsicleEl.animate(
-        [
-          {
-            opacity: 1,
-            transform: "translate(0vw, 0vw)",
-          },
-          {
-            opacity: 0,
-            transform: "translate(35vw, -12vw)",
-          },
-        ],
-        {
-          duration: 500,
-          easing: "ease-in-out",
-          fill: "forwards",
-        }
+      console.log(
+        `Total Demand: ${totalDemand} @ ${engine.icecreamSalePrice}, ice cream: ${engine.iceCreamCount}, Customers: ${customers} `
       );
-    }, animationSpeed + kidId * 30);
-  },
+      const p = engine.generateTraffic(customers);
+      // console.log("# Customers:", p);
+      p.then(() => {
 
-  displayMessage(message) {
-    let messageEl = document.querySelector(".message");
-    messageEl.textContent = message;
+        // console.log("opening modl");
+        engine.dayResultModal.setStats(
+          engine.day,
+          engine.startIcecreamCount - engine.iceCreamCount,
+          engine.icecreamSalePrice,
+          engine.cash - engine.startCash,
+          engine.cash
+        );
+        engine.dayResultModal.open();
+      });
+    });
 
-    const time = Date.now();
-    if (this.messageDisplayUntil < time) {
-      // Timer must have been done, show message
-      messageEl.classList.remove("hidden");
-    }
-    // update message to display for 5 seconds in the future
-    this.messageDisplayUntil = time + this.messageDisplayTime;
+    // console.log(
+    //   "stand L T B R:",
+    //   Graphics.standEl.offsetLeft,
+    //   Graphics.standEl.offsetTop,
+    //   Graphics.standEl.offsetBottom,
+    //   Graphics.standEl.offsetRight
+    // );
+  }
 
-    messageEl.animate(
-      [
-        { backgroundColor: "rgba(0, 103, 238, 0.938)" },
-        { backgroundColor: "rgb(2, 146, 230)" },
-      ],
-      {
-        duration: 200,
-        easing: "ease-in-out",
-      }
-    );
+  endDay() {
+    Graphics.closeStand();
+  }
 
-    // Create time to hide message in the future.
-    if (!this.hideMessageTimer) {
-      this.hideMessageTimer = setInterval(() => {
-        const time = Date.now();
-        if (this.messageDisplayUntil < time) {
-          messageEl.classList.add("hidden");
-          clearInterval(this.hideMessageTimer);
-          this.hideMessageTimer = null;
-        }
-      }, 100);
-      console.log("created Timer " + this.hideMessageTimer);
-    }
-  },
+  calcDemand(price) {
+    //let multiplier = weather * 0.1;
+    const weather = 1;
+    // 20 will affect curve, 6.5 is slope
+    let demand = 20 - 6.5 * price - .5 * (10 - berryCount ) //+ 1 * (weather - 30);
+    // 30 = 0 none, 130 , get 10 more
 
-  openModal() {
-    modal.classList.remove("hidden");
-    overlay.classList.remove("hidden");
-  },
+    console.log(`calcDemand: weather:${weather}, price:${price} = ${demand}`);
+    return demand < 0 ? 0 : demand;
+  }
 
-  closeModal() {
-    modal.classList.add("hidden");
-    overlay.classList.add("hidden");
-  },
-
-  openEndModal() {
-    modalEnd.classList.remove("hidden");
-    overlay.classList.remove("hidden");
-  },
-
-  closeEndModal() {
-    modalEnd.classList.add("hidden");
-    overlay.classList.add("hidden");
-  },
-
-  showMoneyDisplay() {
-    let moneyWrapperEls = document.querySelectorAll(".wrapper-money");
-    for (let i = 0; i < moneyWrapperEls.length; i++) {
-      moneyWrapperEls[i].classList.remove("hidden");
-    }
-  },
-
-  updateMoneyDisplay(amount, flash = true) {
-    let moneyEls = document.querySelectorAll(".money");
-    for (let i = 0; i < moneyEls.length; i++) {
-      moneyEls[i].textContent = amount;
-      if (flash) {
-        moneyEls[i].classList.add("rainbow-text");
+  generateTraffic(count) {
+    // console.log("KidQueue:", engine.kidQueue);
+    let kidPromises = [];
+    let delay = 500;
+    for (let i = 0; i < count; i++) {
+      // console.log("kid");
+      const p = new Promise((resolve) => {
         setTimeout(() => {
-          moneyEls[i].classList.remove("rainbow-text");
-        }, 3000);
-      }
+          const kid = new Kid(i);
+          // console.log("kid!");
+          Graphics.goToStand(kid).then(() => {
+            resolve();
+          });
+        }, delay);
+      });
+      // console.log("push");
+      kidPromises.push(p);
+      delay = Math.random() * 2000;
     }
+    // console.log(kidPromises);
+    return Promise.all(kidPromises);
+  }
 
-    if (isSoundOn) {
-      let soundAddPoint = new sound("audio/add-point.wav");
-      soundAddPoint.play();
-    }
-  },
+  sellIceCream(amount) {
+    // console.log(amount);
+    // console.log(this.iceCreamCount);
+    this.iceCreamCount -= amount;
+    Graphics.updateIceCreamCount(this.iceCreamCount);
+    this.cash += this.icecreamSalePrice;
+    Graphics.updateCashDisplay(this.cash);
+  }
+}
 
-  updatePopsicleStats(popsciclesMade, popsciclesSold) {
-    console.log(popsciclesMade + " " + popsciclesSold);
-    popsiclesMadeEl.textContent = popsciclesMade;
-    popsiclesSoldEl.textContent = popsciclesSold;
+const Graphics = {
+  gameBoardEl: document.querySelector(".board"),
+  soundBtn: document.querySelector(".sound"),
+  makeBtn: document.querySelector(".make"),
+  iceCreamCountEl: document.querySelector(".ice-cream-count"),
+  standEl: document.querySelector(".stand"),
+  moneyEl: document.querySelector(".sidebar-money"),
+  sidebarDayEl: document.querySelector(".sidebar-day"),
+  sidebarIceCreamSalePriceEl: document.querySelector(".sidebar-icecream-price"),
+  icecreamCostEl: document.querySelector(".icecream-cost"),
+  icecreamSignEl: document.querySelector(".stand .sign .price"),
+  animationSpeed: 100,
+
+  init: function () {},
+  updateSoundBtnText(text) {
+    this.soundBtn.textContent = text;
   },
 
   updateDayDisplay(day) {
-    if (day === 1) {
-      let dayWrapperEls = document.querySelectorAll(".wrapper-day");
-      for (let i = 0; i < dayWrapperEls.length; i++) {
-        dayWrapperEls[i].classList.remove("hidden");
-      }
-    }
-    let dayEls = document.querySelectorAll(".day");
-    for (let i = 0; i < dayEls.length; i++) {
-      dayEls[i].textContent = day;
-    }
+    this.sidebarDayEl.textContent = day;
   },
-  updatePopsicleCost(cost) {
-    let popcicleCostEl = document.querySelector(".popsicle-cost");
-    popcicleCostEl.innerHTML = cost;
+
+  updateCashDisplay(amount) {
+    this.moneyEl.textContent = amount.toFixed(2);
+  },
+
+  updateIceCreamCount(total) {
+    this.iceCreamCountEl.textContent = Number(total);
+  },
+
+  updateIceCreamCost(cost) {
+    //this.icecreamCostEl.textContent = cost.toFixed(2);
+  },
+
+  updateIceCreamSalePrice(price) {
+    this.sidebarIceCreamSalePriceEl.textContent = price.toFixed(2);
+    this.icecreamSignEl.textContent = price.toFixed(2);
+  },
+
+  // TODO: rain: https://codemyui.com/add-8-bit-snow-website/
+
+  openStand() {
+    const boardL = Number(this.gameBoardEl.offsetLeft);
+    const standL = Number(this.standEl.offsetLeft);
+    const boardWidth = this.gameBoardEl.clientWidth;
+    // console.log("boardL:", boardL, "standL:", standL);
+    const translateX = boardWidth * -0.85;
+    const promise = this.standEl.animate(
+      [
+        { transform: "translate(0)" },
+        { transform: "translate(" + translateX + "px)" },
+      ],
+      {
+        duration: this.animationSpeed,
+        easing: "ease-out",
+        fill: "forwards",
+      }
+    );
+    return promise;
+  },
+
+  closeStand() {
+    // const standL = Number(this.standEl.offsetLeft);
+    const boardWidth = this.gameBoardEl.clientWidth;
+    const standWidth = this.standEl.clientWidth;
+    // return this.moveElOnGround(this.standEl, 120);
+    // console.log("boardwidth", boardWidth);
+    const curX = this.standEl.computedStyleMap().get("transform")[0]?.x;
+    // console.log("close cur x:", curX);
+    const curY = this.standEl.computedStyleMap().get("transform")[0]?.y;
+    // console.log("close cur y:", curY);
+    // const itemL = Number(this.standEl.offsetLeft);
+    const newX = -(boardWidth + standWidth);
+    const promise = this.standEl.animate(
+      [
+        { transform: "translateX(" + curX + ")" },
+        { transform: "translateX(" + newX + "px)" },
+      ],
+      {
+        duration: this.animationSpeed,
+        easing: "ease-out",
+        fill: "forwards",
+      }
+    );
+    return promise;
+  },
+
+  goToStand(kid) {
+    // console.log("gotostand", kid.icon);
+    const el = kid.el;
+    const boardL = Number(this.gameBoardEl.offsetLeft);
+    const kidL = Number(el.offsetLeft);
+    const boardWidth = this.gameBoardEl.clientWidth;
+    const tX = el.computedStyleMap().get("transform")[0]?.x;
+    // console.log("boardL2:", boardL, el.textContent, "kidL2:", kidL, "tX:", tX);
+    const kidQueue = engine.kidQueue;
+    // console.log("kidQueue:", kidQueue.length, kidQueue);
+    let translateX = boardWidth * -0.85;
+    // remove queue length
+    const queueWidth = el.clientWidth / 2;
+    translateX += kidQueue.length * queueWidth;
+    // add kid to queue
+    kidQueue.push(kid);
+
+    return el
+      .animate(
+        [
+          { transform: "translate(0)" },
+          { transform: "translate(" + translateX + "px)" },
+        ],
+        {
+          duration: this.animationSpeed,
+          easing: "ease-out",
+          fill: "forwards",
+        }
+      )
+      .finished.then(() => {
+        // console.log("goto stand finsihed: " + Date.now());
+        // remove a kid from the queue
+        if (engine.kidQueue.length > 0) {
+          const kidLeave = engine.kidQueue.shift();
+          return this.leaveStand(kidLeave);
+        }
+      });
+  },
+
+  serveIceCream: function () {
+    const kid = Engine.kidQueue.shift();
+  },
+
+  leaveStand: function (kid) {
+    const kidEl = kid.el;
+    // console.log("leaving stand");
+    Sound.playAddPoint();
+
+    // Update stats
+    engine.sellIceCream(1);
+
+    const curX = kidEl.computedStyleMap().get("transform")[0]?.x;
+    const newX = -(this.gameBoardEl.clientWidth + kidEl.clientWidth);
+    // console.log("leaving stand: " + Date.now());
+    const animation = kidEl.animate(
+      [
+        { transform: "translateX(" + curX + ")" },
+        { transform: "translateX(" + newX + "px)" },
+      ],
+      {
+        duration: this.animationSpeed,
+        easing: "ease-out",
+        fill: "forwards",
+      }
+    );
+    return animation.finished;
   },
 };
 
-let soundCtrl = document.querySelector(".sound");
-let startBtn = document.querySelector(".start");
+const Kid = function (id) {
+  // Randomize kid icon
+  this.id = id;
+  let icons = ["🧍🏻‍♀️", "🧍🏼‍♀️", "🧍🏽‍♀️", "🧍🏾‍♀️", "🧍🏿‍♀️", "🧍🏻‍♂️", "🧍🏼‍♂️", "🧍🏽‍♂️", "🧍🏾‍♂️", "🧍🏿‍♂️"];
+  let iconIdx = Math.floor(Math.random() * 10);
+  this.icon = icons[iconIdx];
+  this.el = this.createEl();
+  console.log("Kid created " + this.icon);
+};
 
-soundCtrl.addEventListener("click", (e) => {
-  isSoundOn ? !isSoundOn : isSoundOn;
-  Graphics.updateSoundDisplay();
-});
+Kid.prototype.count = 0;
+Kid.prototype.createEl = function () {
+  let el = document.createElement("div");
+  el.textContent = this.icon;
+  el.classList.add("big-emoji");
+  el.classList.add("kid");
+  el.classList.add("kid-" + this.id);
+  let gameEl = document.querySelector(".board");
+  gameEl.appendChild(el);
+  return el;
+};
 
-startBtn.addEventListener("click", () => {
-  if (!Engine.isGameRunning) {
-    Engine.startGame();
+class DayModal {
+  constructor() {
+    this.modalEl = document.querySelector(".day-start-modal");
+    this.dayEl = document.querySelector(".day-start-modal .day");
+    this.cashEl = document.querySelector(".day-start-modal .cash");
+    this.cashErrorEl = document.querySelector(".day-start-modal .cash-error");
+    this.overlayEl = document.querySelector(".overlay");
+
+    this.berryInputEl = document.querySelector(".berry-slider");
+    this.berryCountEl = document.querySelector(".berry-count");
+    this.berryCostEl = document.querySelector(".berry-cost");
+
+    this.icecreamCountEl = document.querySelector(".icecream-count");
+    this.goBtn = document.querySelector(".day-start-modal button.go");
+
+    this.icecreamCountErrorEl = document.querySelector(".icecream-count-error");
+    this.icecreamPriceEl = document.querySelector(".icecream-price");
+    this.icecreamPriceErrorEl = document.querySelector(".icecream-price-error");
+
+    this.okButton = document.querySelector(".day-result-modal button");
+
+    this.berryInputEl.addEventListener("input", (e) => {
+      this.berryCountEl.textContent = e.target.value;
+      const berryCost = e.target.value * BERRY_COST;
+      this.berryCostEl.textContent = berryCost.toFixed(2);
+      // calc new cash
+      const cash = this.cash - this.getBerryCost() * this.getIceCreamCount();
+      this.cashEl.textContent = cash.toFixed(2);
+    });
+
+    this.icecreamCountEl.addEventListener("input", (e) => {
+      const cash = this.cash - this.getBerryCost() * e.target.value;
+      this.cashEl.textContent = cash.toFixed(2);
+    });
+
+    this.soundBtn = document.querySelector(
+      ".day-start-modal .sound-button button"
+    );
+
+    this.soundBtn.addEventListener("click", () => {
+      Sound.toggleSound();
+    });
+
+    this.okButton.addEventListener("click", (e) => {
+      engine.dayResultModal.closeDayResultModal();
+      engine.nextDay();
+    });
+
+    this.goBtn.addEventListener("click", () => {
+      if (!this.isValid()) {
+        return;
+      }
+
+      // Valid, set values in engine
+      engine.iceCreamCount = this.getIceCreamCount();
+      // console.log(typeof this.dayModal.getIceCreamCount());
+      engine.startIcecreamCount = this.getIceCreamCount();
+      engine.cash = this.getCash();
+      engine.startCash = this.getCash();
+      engine.icecreamSalePrice = this.getIceCreamSalePrice();
+      engine.icecreamCost = this.getBerryCost();
+
+      Graphics.updateCashDisplay(this.cash);
+      Graphics.updateDayDisplay(this.day);
+      Graphics.updateIceCreamCount(this.iceCreamCount);
+      Graphics.updateIceCreamSalePrice(this.icecreamSalePrice);
+      Graphics.updateIceCreamCost(this.icecreamCost);
+      this.closeModal();
+      engine.runDay();
+    });
   }
-  startBtn.classList.add("hidden");
-});
 
-nextDayBtn.addEventListener("click", () => {
-  nextDayBtn.classList.add("hidden");
-  Engine.nextDay();
-});
-
-// Modal
-let goBtn = document.querySelector(".go");
-let moneyEstimationEl = document.querySelector(".money-estimation");
-let priceEl = document.querySelector(".price");
-let amountEl = document.querySelector(".amount");
-let amountErrorEl = document.querySelector(".amount-error");
-let priceErrorEl = document.querySelector(".price-error");
-let popsiclesMadeEl = document.querySelector(".popsicles-made");
-console.log(popsiclesMadeEl);
-let popsiclesSoldEl = document.querySelector(".popsicles-sold");
-
-goBtn.addEventListener("click", () => {
-  let isError = false;
-  if (!amountEl.checkValidity()) {
-    amountErrorEl.innerHTML = amountEl.validationMessage;
-    isError = true;
+  openModal() {
+    this.modalEl.classList.remove("hidden");
+    this.overlayEl.classList.remove("hidden");
   }
 
-  if (!priceEl.checkValidity()) {
-    priceErrorEl = priceEl.validationMessage;
-    isError = true;
+  closeModal() {
+    // console.log("close dayresult modal");
+    this.modalEl.classList.add("hidden");
+    this.overlayEl.classList.add("hidden");
   }
 
-  if (isError) {
-    return;
-  } else {
-    let errorEls = document.querySelectorAll(".error");
-    for (let i = 0; i < errorEls.length; i++) {
-      errorEls[i].innerHTML = "";
+  setDay(day) {
+    this.dayEl.textContent = day;
+  }
+
+  setCash(amount) {
+    this.cash = amount;
+    this.cashEl.textContent = amount.toFixed(2);
+  }
+
+  getCash() {
+    return Number(this.cashEl.textContent);
+  }
+
+  getBerryCount() {
+    return Number(this.berryCountEl.textContent);
+  }
+
+  getBerryCost() {
+    return Number(this.berryCostEl.textContent);
+  }
+
+  getIceCreamCount() {
+    return Number(this.icecreamCountEl.value);
+  }
+
+  getIceCreamSalePrice() {
+    return Number(this.icecreamPriceEl.value);
+  }
+
+  updateSoundBtnText(text) {
+    this.soundBtn.textContent = text;
+  }
+
+  isValid() {
+    let isError = false;
+    if (!this.icecreamCountEl.checkValidity()) {
+      this.icecreamCountErrorEl.innerHTML =
+        this.icecreamCountEl.validationMessage;
+      isError = true;
+    }
+    if (!this.icecreamPriceEl.checkValidity()) {
+      this.icecreamPriceErrorEl.innerHTML =
+        this.icecreamPriceEl.validationMessage;
+      isError = true;
+    }
+
+    // Check cash is positive
+    const cash = Number(this.cashEl.textContent);
+    if (cash < 0) {
+      this.cashErrorEl.innerHTML =
+        "🚫 You don't have enough money, try again 🔄";
+      isError = true;
+    }
+
+    if (isError) {
+      return false;
+    } else {
+      let errorEls = document.querySelectorAll(".error");
+      for (let i = 0; i < errorEls.length; i++) {
+        errorEls[i].innerHTML = "";
+      }
+      return true;
     }
   }
+}
 
-  // Valid
-  Engine.popsiclePrice = Number(priceEl.value);
-  Engine.popcicles = Number(amountEl.value);
-  Engine.popciclesMade += Engine.popsicles;
-
-  Engine.money = Engine.money - Engine.popcicles * Engine.popcicleCost;
-
-  Graphics.updateMoneyDisplay(Engine.money);
-
-  // Reset amount
-  amountEl.value = "";
-  Engine.runDay();
-});
-
-amountEl.addEventListener("input", (e) => {
-  let amount = Number(amountEl.value);
-  if (amount < 0) {
-    amountErrorEl.innerHTML = "Amount must be larger than 0.";
-  } else {
-    amountErrorEl.innerHTML = "";
+class EndGameModal {
+  constructor() {
+    // money
+    this.modalEl = document.querySelector(".end-game-modal");
+    this.moneyEl = document.querySelector(".end-game-modal .cash");
+    this.overlayEl = document.querySelector(".overlay");
+    this.dayEl = document.querySelector(".end-game-modal .day");
   }
-  let estimatedMoney = Engine.money - amount * Engine.popcicleCost;
-  if (estimatedMoney >= 0) {
-    amountErrorEl.innerHTML = "";
-    moneyEstimationEl.textContent = estimatedMoney;
-    goBtn.classList.remove("hidden");
-  } else {
-    amountErrorEl.innerHTML = "You do not have enough money.";
-    goBtn.classList.add("hidden");
+
+  setStats(cash, day) {
+    this.moneyEl.textContent = cash.toFixed(2);
+    this.dayEl.textContent = day;
   }
-});
 
-// End Modal
-let okBtn = document.querySelector(".ok");
+  open() {
+    this.modalEl.classList.remove("hidden");
+    this.overlayEl.classList.remove("hidden");
+  }
 
-okBtn.addEventListener("click", () => {
-  Graphics.closeEndModal();
-  Engine.endGame();
-});
+  close() {}
+}
+
+class DayResultModal {
+    constructor() {
+    this.modalEl = document.querySelector(".day-result-modal");
+    this.dayEl = document.querySelector(".day-result-modal .day");
+    this.iceCreamSoldEl = document.querySelector(
+      ".day-result-modal .icecream-sold"
+    );
+    this.iceCreamSalePriceEl = document.querySelector(".icecream-sale-price");
+    this.revenueEl = document.querySelector(".revenue");
+    this.cashEl = document.querySelector(".day-result-modal .cash");
+    this.overlayEl = document.querySelector(".overlay");
+  }
+
+  setStats(day, iceCreamSold, iceCreamSalePrice, dayRevenue, cash) {
+    console.log(
+      `stats: day: ${day}, icecream: ${iceCreamSold}, dayRevenue: ${dayRevenue}, CASH: ${cash} `
+    );
+    this.dayEl.textContent = day;
+    this.iceCreamSoldEl.textContent = iceCreamSold;
+    this.iceCreamSalePriceEl.textContent = iceCreamSalePrice.toFixed(2);
+    this.revenueEl.textContent = dayRevenue.toFixed(2);
+    this.cashEl.textContent = cash.toFixed(2);
+  }
+
+  open() {
+    this.modalEl.classList.remove("hidden");
+    this.overlayEl.classList.remove("hidden");
+    this.runAnimations();
+  }
+
+  runAnimations() {}
+
+  closeDayResultModal() {
+    this.modalEl.classList.add("hidden");
+    this.overlayEl.classList.add("hidden");
+  }
+}
+
+const Events = {
+  init: function () {
+    Graphics.soundBtn.addEventListener("click", () => {
+      Sound.toggleSound();
+    });
+  },
+};
+
+const engine = new Engine();
+engine.startGame();

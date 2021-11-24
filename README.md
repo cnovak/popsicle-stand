@@ -1,2 +1,0 @@
-# popsicle-stand
-Popsicle Game
