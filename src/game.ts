@@ -73,8 +73,6 @@ export class Game {
       const p = this.generateTraffic(customers);
       // console.log("# Customers:", p);
       p.then(() => {
-        throw new Error("Method not implemented.");
-        //console.log("opening modl");
         if(this.engine.dayResultModal) {    
           this.engine.dayResultModal.display();
         } else {
