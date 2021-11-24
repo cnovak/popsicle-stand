@@ -45,10 +45,6 @@ body > * {
   flex: 1 100%;
 }
 
-.title {
-  /* background-color: bisque; */
-}
-
 .message {
   background-color: rgb(2, 146, 230);
 }
@@ -99,6 +95,14 @@ body > * {
   font-size: 3rem;
 }
 
+.medium-emoji {
+  font-size: 3.0rem;
+}
+
+.big-emoji {
+  font-size: 10rem;
+}
+
 .text-small {
   font-size: 1.25rem;
 }
@@ -147,6 +151,8 @@ body > * {
   z-index: 3;
 }
 
+
+
 .stand {
   position: absolute;
   left: 100%;
@@ -160,7 +166,7 @@ body > * {
   color: white;
   position: absolute;
   top: 0%;
-  left: 22%;
+  left: 0%;
 }
 
 .stand .icon {
@@ -328,7 +334,7 @@ input {
 }
 
 .day-result-modal {
-  height: 40vh;
+  /* height: 40vh; */
 }
 
 .price-center {
@@ -344,10 +350,41 @@ input {
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(3px);
   z-index: 5;
+  border: 0;
 }
 
 .high-scores-list {
   padding: 2%;
   list-style-type: none;
 }
-/* -------------------------- */
+
+
+.sound-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 5px;
+  z-index: 100;
+}
+
+button.global-sound {
+  background: url( './img/iconmonstr-audio-off.svg');
+  background-repeat: no-repeat;
+  background-color: #fff;
+  background-position: center;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 100;
+  background-size: 25px 25px;
+  height: 25px;
+  width: 25px;
+  border: 0;
+  padding: 0;
+}
+
+button.sound-on {
+  background: url( './img/iconmonstr-audio-on.svg');
+  background-color: #fff;
+}
+

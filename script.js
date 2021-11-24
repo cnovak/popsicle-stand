@@ -114,10 +114,10 @@ class Engine {
       console.log(
         `Total Demand: ${totalDemand} @ ${engine.icecreamSalePrice}, ice cream: ${engine.iceCreamCount}, Customers: ${customers} `
       );
-
       const p = engine.generateTraffic(customers);
       // console.log("# Customers:", p);
       p.then(() => {
+
         // console.log("opening modl");
         engine.dayResultModal.setStats(
           engine.day,
@@ -147,27 +147,29 @@ class Engine {
     //let multiplier = weather * 0.1;
     const weather = 1;
     // 20 will affect curve, 6.5 is slope
-    let demand = 20 - 6.5 * price;
+    let demand = 20 - 6.5 * price - .5 * (10 - berryCount ) //+ 1 * (weather - 30);
+    // 30 = 0 none, 130 , get 10 more
+
     console.log(`calcDemand: weather:${weather}, price:${price} = ${demand}`);
     return demand < 0 ? 0 : demand;
   }
 
   generateTraffic(count) {
-    console.log("KidQueue:", engine.kidQueue);
+    // console.log("KidQueue:", engine.kidQueue);
     let kidPromises = [];
     let delay = 500;
     for (let i = 0; i < count; i++) {
-      console.log("kid");
+      // console.log("kid");
       const p = new Promise((resolve) => {
         setTimeout(() => {
           const kid = new Kid(i);
-          console.log("kid!");
+          // console.log("kid!");
           Graphics.goToStand(kid).then(() => {
             resolve();
           });
         }, delay);
       });
-      console.log("push");
+      // console.log("push");
       kidPromises.push(p);
       delay = Math.random() * 2000;
     }
@@ -273,7 +275,7 @@ const Graphics = {
   },
 
   goToStand(kid) {
-    console.log("gotostand", kid.icon);
+    // console.log("gotostand", kid.icon);
     const el = kid.el;
     const boardL = Number(this.gameBoardEl.offsetLeft);
     const kidL = Number(el.offsetLeft);
