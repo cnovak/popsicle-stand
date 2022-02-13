@@ -86,12 +86,14 @@ export class Game {
       p.then(() => {
         this.fadeOut().then(() => {
           this.fadeOutEl.classList.add("hidden");
-          if (this.engine.dayResultModal) {
-            this.engine.dayResultModal.display();
-          } else {
-            console.error("day result modal is null");
-          }
-          this.weatherEngine.stopWeather();
+          throw new Error("Method not implemented.");
+          // console.log("opening modl");
+          // if (this.engine.dayResultModal) {
+          //   this.engine.dayResultModal.display();
+          // } else {
+          //   console.error("day result modal is null");
+          // }
+          // this.weatherEngine.stopWeather();
         });
       });
     });

@@ -3,6 +3,7 @@ import { Game } from "./game";
 import { Modal } from "./modal";
 
 export class DayStartModal extends Modal {
+  formEl = document.querySelector('form.day-start')!;
   playerNameEl = document.querySelector('.day-start-modal .player-name')!;
   inventoryCountEl = document.querySelector('.day-start-modal .current-ice-cream-count')!;
   inventoryNewCountEl = document.querySelector('.day-start-modal .create-ice-cream-count')!;
@@ -19,9 +20,10 @@ export class DayStartModal extends Modal {
   icecreamSalePriceEl = <HTMLInputElement>document.querySelector(".icecream-price");
   icecreamSalePriceErrorEl = document.querySelector(".icecream-price-error");
   okButton = document.querySelector(".day-result-modal button")!;
+  tickerEl = document.querySelector(".ticker")!;
 
   cash: number = 0;
-  iceCreamCount: number = 0;
+  iceCreamCount: number = 7;
   iceCreamSalePrice = .50;
 
   berryInputSubscription: Subscription;
@@ -47,7 +49,8 @@ export class DayStartModal extends Modal {
       this.updateDisplay();
     });
 
-    this.goButtonSubscription = fromEvent(this.goBtn, 'click').subscribe(() => {
+    this.goButtonSubscription = fromEvent(this.goBtn, 'click').subscribe((event:Event) => {
+      event.preventDefault();
       if (!this.isValid()) {
         return;
       }
@@ -78,6 +81,7 @@ export class DayStartModal extends Modal {
     this.game = game;
     this.init();
     this.openModal();
+    this.berryInputEl.focus();
   }
 
   init() {
@@ -92,6 +96,12 @@ export class DayStartModal extends Modal {
   
     // update cash
     this.updateDisplay();
+
+    const tickerItemEl = document.createElement('div');
+    this.tickerEl.innerHTML = '';
+    tickerItemEl.classList.add('ticker-item');
+    tickerItemEl.textContent = `Today's weather: ${this.game.weatherEngine.getCurrentWeather().getName()}`;
+    this.tickerEl.appendChild(tickerItemEl);
   }
 
   updateDisplay() {

@@ -20,6 +20,7 @@ export class Engine {
 
   run() {
     this.gameOverModal.display();
+    // this.startGame("Player 1");
   }
 
   startGame(userName: string) {
@@ -33,7 +34,7 @@ export class Engine {
   }
 
   showEndGameModal() {
-    this.gameEndModal.display();
+    this.gameEndModal?.display();
   }
 
   endGame() {
@@ -44,6 +45,7 @@ export class Engine {
       this.game!.playerName,
       this.game!.store.cash
     );
+    this.game?.destroy();
     this.run();
   }
 }

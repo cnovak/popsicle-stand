@@ -147,8 +147,9 @@ class Engine {
     //let multiplier = weather * 0.1;
     const weather = 1;
     // 20 will affect curve, 6.5 is slope
-    let demand = 20 - 6.5 * price - .5 * (10 - berryCount ) //+ 1 * (weather - 30);
+    //let demand = 20 - 6.5 * price - .5 * (10 - berryCount ) //+ 1 * (weather - 30);
     // 30 = 0 none, 130 , get 10 more
+    let demand = 20 - 6.5 * price + (berryCoun )
 
     console.log(`calcDemand: weather:${weather}, price:${price} = ${demand}`);
     return demand < 0 ? 0 : demand;

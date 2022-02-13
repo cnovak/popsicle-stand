@@ -86,6 +86,8 @@ export class Game {
       p.then(() => {
         this.fadeOut().then(() => {
           this.fadeOutEl.classList.add("hidden");
+          // throw new Error("Method not implemented.");
+          console.log("opening modl");
           if (this.engine.dayResultModal) {
             this.engine.dayResultModal.display();
           } else {

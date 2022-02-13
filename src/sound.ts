@@ -28,7 +28,7 @@ export class Sound {
       //this.engine.dayModal.updateSoundBtnText("Sound On");
     } else {
       this.isSoundOn = true;
-      this.playBackgroundMusic();
+      //this.playBackgroundMusic();
       this.soundBtn.classList.add('sound-on');
       //Graphics.updateSoundBtnText("Sound Off");
       //engine.dayModal.updateSoundBtnText("Sound Off");
