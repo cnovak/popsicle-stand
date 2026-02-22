@@ -1,0 +1,58 @@
+@import url("https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Press Start 2P", sans-serif;
+  color: rgb(65, 63, 63);
+  background-color: #f4fafd;
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 4rem;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.error {
+  color: red;
+}
+
+.button {
+  border: none;
+  background-color: rgb(2, 146, 230);
+  color: #222;
+  font-size: 2rem;
+  font-family: inherit;
+  padding: 2rem 3rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: rgba(0, 103, 238, 0.938);
+}
+
+.rainbow-background {
+  /* Simple rainbow effect or just a solid color for now */
+  background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #ffd1ff, #a1c4fd);
+}
+
+
+.hidden {
+  display: none;
+}

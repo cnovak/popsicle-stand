@@ -1,0 +1,28 @@
+{
+  "devDependencies": {
+    "html-webpack-plugin": "^5.6.6",
+    "rxjs": "^7.8.2",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "webpack": "^5.105.2",
+    "webpack-cli": "^6.0.1"
+  },
+  "name": "popsicle-stand",
+  "description": "Ice Cream Game",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnovak/popsicle-stand.git"
+  },
+  "keywords": [],
+  "author": "Chris Novak",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/cnovak/popsicle-stand/issues"
+  },
+  "homepage": "https://github.com/cnovak/popsicle-stand#readme"
+}
